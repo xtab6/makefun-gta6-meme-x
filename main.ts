@@ -8,9 +8,11 @@
 //
 // All this program has to do is hand POST.json to the grader: it copies
 // POST.json from the repository root to /output/POST.json, where the gate
-// reads it. The POST.json committed here still holds the placeholder address
-// until the post exists, so the gate refuses it as it stands (valid 0);
-// the post's address replaces it before the entry is submitted.
+// reads it. It also copies meme.png, the meme itself, beside it when the
+// file is there, so the picture the post carries travels with the address
+// that names it. The POST.json committed here still holds the placeholder
+// address until the post exists, so the gate refuses it as it stands
+// (valid 0); the post's address replaces it before the entry is submitted.
 //
 // It prints nothing on success. It fails (exit 1) only when POST.json is
 // missing or is not a JSON object carrying a string url: a broken entry
@@ -20,7 +22,7 @@
 // stand in for /bot and /output:
 //   mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 function dirFromEnv(name: string, fallback: string): string {
@@ -58,6 +60,9 @@ function main(): void {
   mkdirSync(outputDir, { recursive: true });
   try {
     copyFileSync(join(botDir, "POST.json"), join(outputDir, "POST.json"));
+    if (existsSync(join(botDir, "meme.png"))) {
+      copyFileSync(join(botDir, "meme.png"), join(outputDir, "meme.png"));
+    }
   } catch (err) {
     console.error(`POST.json could not be copied to ${outputDir}: ${(err as Error).message}`);
     process.exit(1);
